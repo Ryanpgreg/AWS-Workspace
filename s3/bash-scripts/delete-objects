@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+ echo "== delete-objects"
+set -e
+
+# Check for bucket name
+if [ -z "$1" ]; then
+  echo "Must be a bucket name eg. ./delete-objects my-bucket"
+  exit 1
+fi
+
+BUCKET_NAME="$1"
+
+# Create a temporary delete file in Windows temp folder
+DELETE_FILE="$(cygpath -w /c/Users/$USERNAME/AppData/Local/Temp/delete_objects.json)"
+
+# Create the JSON delete list
+aws s3api list-objects-v2 \
+  --bucket "$BUCKET_NAME" \
+  --query "Contents[].Key" \
+  --output json \
+| jq '{Objects: map({Key: .})}' > /c/Users/$USERNAME/AppData/Local/Temp/delete_objects.json
+
+# Debug print
+echo "Generated JSON delete file:"
+cat /c/Users/$USERNAME/AppData/Local/Temp/delete_objects.json
+
+# Delete the objects using the Windows-style path
+aws s3api delete-objects \
+  --bucket "$BUCKET_NAME" \
+  --delete "file://$DELETE_FILE"
+
+echo "Deleted all objects in bucket: $BUCKET_NAME"
