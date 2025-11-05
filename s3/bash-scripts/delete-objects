@@ -24,7 +24,7 @@ aws s3api list-objects-v2 \
 echo "Generated JSON delete file:"
 cat /c/Users/$USERNAME/AppData/Local/Temp/delete_objects.json
 
-# Delete the objects using the Windows-style path
+# Delete the objects
 aws s3api delete-objects \
   --bucket "$BUCKET_NAME" \
   --delete "file://$DELETE_FILE"
